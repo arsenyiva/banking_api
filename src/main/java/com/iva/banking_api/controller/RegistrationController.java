@@ -1,8 +1,7 @@
 package com.iva.banking_api.controller;
 
-import com.iva.banking_api.service.BankAccountService;
+
 import com.iva.banking_api.service.RegistrationService;
-import com.iva.banking_api.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

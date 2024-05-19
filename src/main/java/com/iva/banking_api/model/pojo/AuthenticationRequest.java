@@ -1,8 +1,7 @@
 package com.iva.banking_api.model.pojo;
 
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+
 
 /**
  * Класс для передачи данных аутентификации.

@@ -1,8 +1,6 @@
 package com.iva.banking_api.controller;
 
-import com.iva.banking_api.model.BankAccount;
 import com.iva.banking_api.model.pojo.TransferRequest;
-import com.iva.banking_api.service.BankAccountService;
 import com.iva.banking_api.service.TransferService;
 import com.iva.banking_api.service.UserService;
 import com.iva.banking_api.util.JwtTokenUtils;
