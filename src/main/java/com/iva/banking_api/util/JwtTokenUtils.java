@@ -40,12 +40,6 @@ public class JwtTokenUtils {
                 .signWith(SignatureAlgorithm.HS256, secret).compact();
     }
 
-    /**
-     * Извлечение имени пользователя из JWT токена.
-     *
-     * @param token JWT токен
-     * @return имя пользователя
-     */
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -69,5 +63,8 @@ public class JwtTokenUtils {
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
 
 }
