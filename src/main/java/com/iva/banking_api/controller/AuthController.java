@@ -1,54 +1,50 @@
 package com.iva.banking_api.controller;
 
-import com.iva.banking_api.model.AuthenticationRequest;
-import com.iva.banking_api.model.AuthenticationResponse;
-import com.iva.banking_api.util.JwtTokenUtils;
+import com.iva.banking_api.model.pojo.AuthenticationRequest;
+import com.iva.banking_api.model.pojo.AuthenticationResponse;
+import com.iva.banking_api.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Контроллер аутентификации.
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    private static final org.apache.log4j.Logger log = Logger.getLogger(AuthController.class);
+
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    private AuthService authService;
 
-    @Autowired
-    private JwtTokenUtils jwtTokenUtils;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
+    /**
+     * Создает JWT токен для аутентификации пользователя.
+     *
+     * @param authenticationRequest Запрос на аутентификацию
+     * @return Ответ с JWT токеном или сообщением об ошибке
+     */
     @PostMapping
+    @Operation(summary = "Аутентификация пользователя и генерация JWT токена")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully authenticated"),
+            @ApiResponse(responseCode = "401", description = "Invalid username or password")
+    })
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) {
-
         try {
-            // Попытка аутентификации пользователя
-            authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-
-            // Получение UserDetails для создания токена
-            final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
-
-            // Генерация JWT токена
-            final String token = jwtTokenUtils.generateToken(userDetails);
-
-            // Возврат токена в ответе
+            String token = authService.authenticateAndGetToken(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+            log.debug(authenticationRequest.getUsername() + " successfully authenticated");
             return ResponseEntity.ok(new AuthenticationResponse(token));
         } catch (AuthenticationException e) {
-            // Обработка ошибки аутентификации (неверный логин/пароль или заблокированный пользователь)
+            log.error("Invalid username or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
-    }
-
-    private void authenticate(String username, String password) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 }

@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
+/**
+ * Репозиторий для выполнения операций с пользователями в базе данных.
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
@@ -15,11 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     User findByEmail(String email);
 
     User findByPhone(String phone);
+
     User findByExtraPhone(String phone);
-
-    void deleteByIdAndExtraPhoneNotNull(Long id);
-
-    void deleteByIdAndPhoneNotNull(Long id);
 
     User findByExtraEmail(String email);
 }

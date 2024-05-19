@@ -1,5 +1,6 @@
 package com.iva.banking_api.service;
 
+import com.iva.banking_api.model.BankAccount;
 import com.iva.banking_api.model.User;
 import com.iva.banking_api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,39 +11,52 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
+/**
+ * Сервис для управления пользователями.
+ */
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
 
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
+    /**
+     * Получает пользователя по его идентификатору.
+     *
+     * @param id идентификатор пользователя
+     * @return объект пользователя, если найден, иначе null
+     */
     public User getUserById(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
         return userOptional.orElse(null);
     }
 
+    /**
+     * Создает нового пользователя.
+     *
+     * @param user новый пользователь
+     */
     public void createUser(User user) {
         userRepository.save(user);
     }
 
-    public boolean editUserPhone(long userId, String newPhone) {
-        Optional<User> optionalUser = userRepository.findById(userId);
+    /**
+     * Изменяет телефон пользователя.
+     *
+     * @param id       идентификатор пользователя
+     * @param newPhone новый номер телефона
+     * @return true, если изменение прошло успешно, иначе false
+     */
+    public boolean editUserPhone(long id, String newPhone) {
+        Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (isPhoneAvailable(newPhone) && isExtraPhoneAvailable(newPhone)) {
@@ -54,6 +68,13 @@ public class UserService {
         return false;
     }
 
+    /**
+     * Изменяет дополнительный телефон пользователя.
+     *
+     * @param id       идентификатор пользователя
+     * @param newPhone новый дополнительный номер телефона
+     * @return true, если изменение прошло успешно, иначе false
+     */
     public boolean editExtraUserPhone(long id, String newPhone) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
@@ -67,6 +88,13 @@ public class UserService {
         return false;
     }
 
+    /**
+     * Изменяет электронную почту пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @param email  новый адрес электронной почты
+     * @return true, если изменение прошло успешно, иначе false
+     */
     public boolean editEmail(long userId, String email) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
@@ -80,6 +108,13 @@ public class UserService {
         return false;
     }
 
+    /**
+     * Изменяет дополнительный адрес электронной почты пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @param email  новый дополнительный адрес электронной почты
+     * @return true, если изменение прошло успешно, иначе false
+     */
     public boolean editExtraEmail(long userId, String email) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isPresent()) {
@@ -93,13 +128,17 @@ public class UserService {
         return false;
     }
 
-
-    public User updateUser(Long id, User user) {
+    /**
+     * Обновляет информацию о пользователе.
+     *
+     * @param id   идентификатор пользователя, информацию о котором нужно обновить
+     * @param user новая информация о пользователе
+     */
+    public void updateUser(Long id, User user) {
         if (userRepository.existsById(id)) {
             user.setId(id);
-            return userRepository.save(user);
+            userRepository.save(user);
         }
-        return null;
     }
 
 
@@ -131,6 +170,19 @@ public class UserService {
         return matcher.matches();
     }
 
+    /**
+     * Поиск пользователей с использованием заданных критериев.
+     *
+     * @param dateOfBirth дата рождения для поиска
+     * @param phone       телефон для поиска
+     * @param username    имя пользователя для поиска
+     * @param email       электронная почта для поиска
+     * @param page        номер страницы результатов
+     * @param size        количество результатов на странице
+     * @param sortBy      поле для сортировки результатов
+     * @param sortOrder   порядок сортировки (ASC или DESC)
+     * @return список пользователей, удовлетворяющих заданным критериям
+     */
     public List<User> searchUsers(String dateOfBirth, String phone, String username, String email,
                                   int page, int size, String sortBy, String sortOrder) {
         Specification<User> specification = Specification.where(null);
@@ -141,6 +193,7 @@ public class UserService {
                     criteriaBuilder.greaterThanOrEqualTo(root.get("dateOfBirth"), parsedDateOfBirth));
         }
 
+        //Искать телефон нужно без +
         if (phone != null) {
             if (!phone.startsWith("+")) {
                 phone = "+" + phone;
@@ -150,7 +203,6 @@ public class UserService {
                     criteriaBuilder.equal(root.get("phone"), finalPhone));
         }
 
-
         if (username != null) {
             specification = specification.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.like(
@@ -159,7 +211,6 @@ public class UserService {
                     )
             );
         }
-
 
         if (email != null) {
             specification = specification.and((root, query, criteriaBuilder) ->
@@ -174,15 +225,35 @@ public class UserService {
         Page<User> userPage = userRepository.findAll(specification, pageable);
         return userPage.getContent();
     }
-    public boolean isUserOwnsId(String username, long id) {
-        // Получаем пользователя по имени пользователя (username)
-        User user = userRepository.findByUsername(username);
 
-        // Проверяем, совпадает ли id пользователя с запрашиваемым id
+    /**
+     * Проверяет, владеет ли пользователь указанным идентификатором.
+     *
+     * @param username имя пользователя
+     * @param id       идентификатор, который нужно проверить
+     * @return true, если пользователь владеет указанным идентификатором, иначе false
+     */
+    public boolean isUserOwnsId(String username, long id) {
+        User user = userRepository.findByUsername(username);
         return user != null && user.getId() == id;
     }
 
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    /**
+     * Обновляет балансы пользователей
+     */
+    public void updateUserBalances() {
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            BankAccount bankAccount = user.getBankAccount();
+            double currentBalance = bankAccount.getBalance();
+            double initialBalance = bankAccount.getBalance();
+            double updatedBalance = currentBalance * 1.05;
+            double maxBalance = initialBalance * 2.07;
+            if (updatedBalance > maxBalance) {
+                updatedBalance = maxBalance;
+            }
+            bankAccount.setBalance(updatedBalance);
+        }
+        userRepository.saveAll(users);
     }
 }

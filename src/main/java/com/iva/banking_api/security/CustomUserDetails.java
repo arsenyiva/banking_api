@@ -1,11 +1,15 @@
-package com.iva.banking_api.model;
+package com.iva.banking_api.security;
 
+import com.iva.banking_api.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Класс, реализующий интерфейс UserDetails для предоставления информации о пользователе Spring Security.
+ */
 public class CustomUserDetails implements UserDetails {
 
     private User user;
@@ -17,6 +21,7 @@ public class CustomUserDetails implements UserDetails {
     public User getUser() {
         return user;
     }
+
     public Long getId() {
         return user.getId();
     }

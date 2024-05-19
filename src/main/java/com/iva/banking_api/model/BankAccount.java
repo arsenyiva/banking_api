@@ -5,7 +5,10 @@ import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+/**
+ * Модель, представляющая банковский счет.
+ * Содержит информацию о владельце счета и его балансе.
+ */
 @Entity
 @Data
 @AllArgsConstructor

@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Сервис для регистрации новых пользователей
+ */
 @Service
 public class RegistrationService {
 
@@ -23,6 +26,18 @@ public class RegistrationService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Регистрация нового пользователя и создание его банковского счета.
+     *
+     * @param username       имя пользователя
+     * @param password       пароль пользователя
+     * @param dateOfBirth    дата рождения пользователя
+     * @param phone          основной номер телефона пользователя
+     * @param extraPhone     дополнительный номер телефона пользователя
+     * @param email          адрес электронной почты пользователя
+     * @param initialBalance начальный баланс банковского счета
+     * @return true, если регистрация прошла успешно, в противном случае - false
+     */
     public boolean registerNewUser(String username, String password,
                                    LocalDate dateOfBirth, String phone, String extraPhone,
                                    String email, Double initialBalance) {
